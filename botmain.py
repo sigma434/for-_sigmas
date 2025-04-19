@@ -1,8 +1,11 @@
 import telebot
-from main import gen_pas, gen_emoji, flip_coin
+import os
+import random
+from main import gen_pas, gen_emoji, flip_coin, get_d_img_url
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from telebot.handler_backends import ContinueHandling
 from telebot import types
+import requests
 # Замени 'TOKEN' на токен твоего бота
 # Этот токен ты получаешь от BotFather, чтобы бот мог работать
 bot = telebot.TeleBot("YOUR TOKEN")
@@ -16,13 +19,10 @@ bot.set_my_commands(
         telebot.types.BotCommand("emodji", "sends you a random emoji"),
         telebot.types.BotCommand("coin", "just flipps a coin and tells you the result"),
         telebot.types.BotCommand("button", "creating a button: (sus)"),
+        telebot.types.BotCommand("photo", "sending you a mem"),
+        telebot.types.BotCommand("duck","sending an duck image")
         ])
 
-
-#bot.message_handler(content_types=["text"])
-#def send_hello(message):
-#    if message.text == "hello" or "привет":
-#        bot.send_message(message.chat.id, f"привет, {message.from_user.first_name}")
 
 
 @bot.message_handler(commands=['start'])
@@ -49,10 +49,31 @@ def send_coin(message):
     coin = flip_coin()
     bot.reply_to(message, f"Монетка выпала так: {coin}")
 
+@bot.message_handler(commands=['duck'])
+def duck(message):
+  image_url = get_d_img_url()
+  bot.reply_to(message, image_url)
+
+@bot.message_handler(commands=['photo'])
+def send_mem(message):
+     mg=random.choice(os.listdir('images'))
+     with open(f'images//{mg}' , 'rb') as f :
+         bot.send_photo(message.chat.id, f)
+
+#@bot.message_handler(command=['random_beluga'])
+#def send_photo(message):
+#   bot.send_photo(message.chat.id, send.dog.photo.url)
+
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
   bot.reply_to(message, message.text)
   return ContinueHandling()
+
+#@bot.message_handler(content_types=["text"])
+#def send_hello(message):
+#    if message.text.lower == "hello" or "привет":
+#        bot.send_message(message.chat.id, f"привет, {message.from_user.first_name}")
+#    return ContinueHandling()
 
 @bot.message_handler(commands=["button"])
 def button_message(message):
@@ -68,4 +89,4 @@ def message_reply(message):
       bot.send_message(message.chat.id,"https://github.com/sigma434/for-_sigmas")
       
 
-bot.polling()
+bot.infinity_polling()
